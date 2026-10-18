@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LibraScan — Scan. Borrow. Read.</title>
+<meta name="description" content="The campus library in your pocket. Scan a book's QR code to borrow, track due dates, and ask the AI librarian. Download LibraScan for Android.">
+<meta name="theme-color" content="#7A1224">
+<link rel="icon" href="librascan-logo.png">
+<style>
+  :root{
+    --maroon:#7A1224; --maroon-dark:#5C0D1B; --maroon-soft:#9C2A3D; --tint:#FBEEF0;
+    --gold:#C99A3C; --canvas:#F4F6F3; --card:#fff; --ink:#1C1C1E; --muted:#666B66; --line:#ECEEE9;
+    --green:#3F7D53; --green-t:#EAF4EC; --amber:#E5A536; --amber-t:#FDF4E3; --red:#D32F2F; --red-t:#FDECEC;
+    --serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--canvas:#14171A;--card:#1E2226;--ink:#F2F2F0;--muted:#AEB4B9;--line:#2E3439;--tint:#2b1a1f;--gold:#D9AE5C;
+      --green-t:#1a2e22;--amber-t:#33290f;--red-t:#35191a}
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-text-size-adjust:100%}
+  a{color:inherit}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+
+  /* top bar */
+  .bar{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:700;font-size:21px;text-decoration:none}
+  .brand img{width:36px;height:36px;border-radius:10px;background:var(--maroon);padding:3px}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:999px;font-weight:700;font-size:15px;
+    text-decoration:none;border:1.5px solid var(--maroon);color:var(--maroon);background:transparent}
+  .pill.solid{background:var(--maroon);color:#fff;box-shadow:0 10px 22px -10px rgba(122,18,36,.7)}
+  .pill:active{transform:scale(.97)}
+  @media (prefers-color-scheme:dark){.pill{border-color:var(--gold);color:var(--gold)}.pill.solid{background:var(--maroon);color:#fff;border-color:var(--maroon)}}
+
+  /* hero */
+  .hero{display:grid;gap:32px;align-items:center;padding:20px 0 56px}
+  @media(min-width:860px){.hero{grid-template-columns:1.1fr .9fr;padding-top:36px}}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--maroon);
+    background:var(--tint);padding:6px 12px;border-radius:999px}
+  @media (prefers-color-scheme:dark){.eyebrow{color:var(--gold)}}
+  h1{font-family:var(--serif);font-size:clamp(44px,9vw,76px);line-height:1;margin:18px 0 18px;letter-spacing:-.02em}
+  h1 span{display:block}
+  h1 .r{color:var(--maroon)}
+  @media (prefers-color-scheme:dark){h1 .r{color:#d9566b}}
+  h1 .g{color:var(--gold);font-style:italic}
+  .lede{font-size:18px;color:var(--muted);max-width:30em;margin:0 0 26px}
+  .cta{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px}
+  .meta{font-size:13px;color:var(--muted)}
+
+  /* phone mock */
+  .stage{display:flex;justify-content:center;position:relative}
+  .stage::before{content:"";position:absolute;inset:6% 8%;background:radial-gradient(circle at 50% 40%,rgba(122,18,36,.22),transparent 70%);filter:blur(10px)}
+  .phone{position:relative;width:268px;aspect-ratio:9/18.5;background:#111;border-radius:40px;padding:9px;
+    box-shadow:0 40px 60px -30px rgba(92,13,27,.6),0 0 0 2px #2a2a2a;transform:rotate(3deg)}
+  .screen{width:100%;height:100%;border-radius:32px;overflow:hidden;background:#fff;display:flex;flex-direction:column;position:relative}
+  .ph-head{display:flex;align-items:center;justify-content:center;gap:6px;padding:26px 10px 9px;font-weight:800;font-size:13px;color:var(--maroon);background:#fff}
+  .cam{flex:1;position:relative;background:radial-gradient(circle at 78% 18%,#6d6d72 0,#1a1a1d 28%,#050505 62%)}
+  .cam .dimmed{position:absolute;inset:0;background:rgba(0,0,0,.35)}
+  .frame{position:absolute;left:50%;top:44%;width:132px;height:132px;transform:translate(-50%,-50%)}
+  .frame i{position:absolute;width:26px;height:26px;border:4px solid #fff}
+  .frame i:nth-child(1){top:0;left:0;border-right:0;border-bottom:0;border-radius:7px 0 0 0}
+  .frame i:nth-child(2){top:0;right:0;border-left:0;border-bottom:0;border-radius:0 7px 0 0}
+  .frame i:nth-child(3){bottom:0;left:0;border-right:0;border-top:0;border-radius:0 0 0 7px}
+  .frame i:nth-child(4){bottom:0;right:0;border-left:0;border-top:0;border-radius:0 0 7px 0}
+  .frame b{position:absolute;left:8px;right:8px;height:3px;border-radius:2px;background:#fff;opacity:.9;box-shadow:0 0 12px 2px rgba(255,255,255,.55);animation:sweep 3.4s ease-in-out infinite}
+  .qr{position:absolute;inset:26px;opacity:.9;background:
+    conic-gradient(#fff 25%,transparent 0 50%,#fff 0 75%,transparent 0) 0 0/20px 20px;border-radius:4px;mask:linear-gradient(#000,#000);opacity:.18}
+  @keyframes sweep{0%,100%{top:6px}50%{top:calc(100% - 9px)}}
+  .hint{position:absolute;left:0;right:0;top:calc(44% + 78px);text-align:center;color:#fff;font-size:10.5px;font-weight:700;padding:0 12px}
+  .sheet{background:#fff;border-radius:18px 18px 0 0;margin-top:-14px;position:relative;padding:10px 10px 14px;display:grid;gap:7px}
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .tab{font-size:10.5px;font-weight:800;text-align:center;padding:8px 0;border-radius:999px;border:1.5px solid #e4e4e4;color:#999}
+  .tab.on{background:var(--maroon);border-color:var(--maroon);color:#fff}
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .act{font-size:10px;font-weight:700;text-align:center;padding:7px 0;border-radius:999px;border:1.5px solid var(--maroon);color:var(--maroon)}
+  .float{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 14px;font-size:13px;font-weight:700;
+    box-shadow:0 18px 30px -18px rgba(0,0,0,.4);animation:bob 5s ease-in-out infinite}
+  .float small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+  .float.a{left:2%;top:18%}
+  .float.b{right:0;bottom:16%;animation-delay:-2.2s}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @media(max-width:520px){.float.a{left:-2px}.float.b{right:-2px}}
+
+  /* sections */
+  section{padding:44px 0}
+  h2{font-family:var(--serif);font-size:clamp(30px,5vw,42px);line-height:1.1;margin:0 0 10px;letter-spacing:-.015em}
+  .kicker{color:var(--muted);margin:0 0 28px;max-width:34em;font-size:17px}
+
+  /* steps */
+  .steps{display:grid;gap:14px;counter-reset:s}
+  @media(min-width:760px){.steps{grid-template-columns:repeat(3,1fr)}}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px 22px;position:relative;overflow:hidden}
+  .step::after{counter-increment:s;content:"0" counter(s);position:absolute;right:16px;top:2px;font-family:var(--serif);font-size:84px;font-weight:700;color:var(--gold);opacity:.18;line-height:1}
+  .step h3{margin:0 0 6px;font-size:19px}
+  .step p{margin:0;color:var(--muted);font-size:15px}
+
+  /* bento */
+  .bento{display:grid;gap:14px}
+  @media(min-width:760px){.bento{grid-template-columns:repeat(6,1fr)}.t1{grid-column:span 4}.t2{grid-column:span 2}.t3{grid-column:span 3}.t4{grid-column:span 3}}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:24px;min-height:210px;display:flex;flex-direction:column;gap:14px}
+  .tile.maroon{background:linear-gradient(150deg,var(--maroon),var(--maroon-dark));color:#fff;border:0}
+  .tile h3{margin:0;font-size:20px}
+  .tile p{margin:0;font-size:15px;color:var(--muted)}
+  .tile.maroon p{color:rgba(255,255,255,.78)}
+  .chat{display:grid;gap:8px;margin-top:auto}
+  .bub{max-width:82%;padding:10px 14px;border-radius:18px;font-size:14px}
+  .bub.me{justify-self:end;background:#fff;color:var(--maroon);border-bottom-right-radius:6px;font-weight:600}
+  .bub.ai{background:rgba(255,255,255,.16);border-bottom-left-radius:6px}
+  .spines{display:flex;align-items:flex-end;gap:6px;margin-top:auto;height:70px}
+  .spines i{flex:1;border-radius:5px 5px 2px 2px;background:var(--maroon)}
+  .spines i:nth-child(2){background:var(--gold)}.spines i:nth-child(3){background:var(--green)}
+  .spines i:nth-child(4){background:var(--maroon-soft)}.spines i:nth-child(5){background:#b9a98f}
+  .status{display:grid;gap:8px;margin-top:auto}
+  .st{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:12px;font-size:13px;font-weight:700}
+  .st.g{background:var(--green-t);color:var(--green)}.st.a{background:var(--amber-t);color:#a8710f}.st.r{background:var(--red-t);color:var(--red)}
+  @media (prefers-color-scheme:dark){.st.a{color:var(--amber)}}
+  .note{display:flex;gap:12px;align-items:center;background:var(--tint);border-radius:16px;padding:12px 14px;margin-top:auto;font-size:14px;font-weight:600}
+  .note .dot{flex:none;width:34px;height:34px;border-radius:50%;background:var(--maroon);color:#fff;display:grid;place-items:center;font-size:16px}
+
+  /* checkout slip */
+  .slip-wrap{padding-top:20px}
+  .slip{position:relative;background:var(--card);border:1px solid var(--line);border-radius:28px;display:grid;overflow:hidden;
+    box-shadow:0 30px 50px -32px rgba(92,13,27,.5)}
+  @media(min-width:760px){.slip{grid-template-columns:1.4fr 1fr}}
+  .slip-main{padding:30px 28px}
+  .slip-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:.14em;font-weight:800;text-transform:uppercase;color:var(--maroon)}
+  @media (prefers-color-scheme:dark){.slip-top{color:var(--gold)}}
+  .barcode{height:24px;width:110px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px);opacity:.75;border-radius:2px}
+  .slip h2{margin:18px 0 20px}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:18px 14px}
+  .f small{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .f span{font-weight:700;font-size:15px}
+  .slip-stub{padding:28px;display:flex;flex-direction:column;justify-content:center;gap:14px;background:var(--tint);border-top:2px dashed var(--line)}
+  @media(min-width:760px){.slip-stub{border-top:0;border-left:2px dashed var(--line)}}
+  .slip-stub .pill{justify-content:center;font-size:17px;padding:15px 20px}
+  .slip-stub p{margin:0;font-size:13px;color:var(--muted);text-align:center}
+  .cut{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--canvas);border:1px solid var(--line);display:none}
+  @media(min-width:760px){.cut{display:block;left:calc(58.33% - 13px)}.cut.t{top:-13px}.cut.b{bottom:-13px}}
+
+  details{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 20px;margin-top:14px}
+  summary{cursor:pointer;font-weight:700}
+  details ol{margin:12px 0 4px;padding-left:20px;color:var(--muted);display:grid;gap:6px}
+  footer{padding:36px 0 48px;text-align:center;color:var(--muted);font-size:13px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="#top"><img src="librascan-logo.png" alt="">LibraScan</a>
+    <a class="pill dl" href="#">Download</a>
+  </header>
+
+  <main id="top">
+    <div class="hero">
+      <div>
+        <span class="eyebrow">Campus library · Android</span>
+        <h1><span class="r">Scan.</span><span>Borrow.</span><span class="g">Read.</span></h1>
+        <p class="lede">The library in your pocket. Point your phone at a book's QR code to send a borrow request, keep track of due dates, and ask the AI librarian what to read next.</p>
+        <div class="cta">
+          <a class="pill solid dl" href="#">⬇ Download for Android</a>
+          <span class="meta"><span id="m-ver"></span> · <span id="m-size"></span></span>
+        </div>
+      </div>
+
+      <div class="stage" aria-hidden="true">
+        <div class="phone"><div class="screen">
+          <div class="ph-head">▣ Scan QR Code</div>
+          <div class="cam">
+            <div class="dimmed"></div>
+            <div class="frame"><div class="qr"></div><i></i><i></i><i></i><i></i><b></b></div>
+            <div class="hint">Scan a book's QR code to borrow</div>
+          </div>
+          <div class="sheet">
+            <div class="tabs"><div class="tab on">Borrow</div><div class="tab">Return</div></div>
+            <div class="acts"><div class="act">⚡ Flash</div><div class="act">▨ Upload</div></div>
+          </div>
+        </div></div>
+        <div class="float a">Request sent<small>Waiting for the librarian</small></div>
+        <div class="float b">✓ Approved<small>Pick up at the desk</small></div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Three taps from shelf to reading list</h2>
+      <p class="kicker">No lines, no paper slips.</p>
+      <div class="steps">
+        <div class="step"><h3>Scan the QR</h3><p>Open the scanner, choose Borrow, and point at the code on the book. Can't scan it? Upload a photo of the code.</p></div>
+        <div class="step"><h3>Get approved</h3><p>Your request goes straight to the library. You're notified as soon as a librarian approves it.</p></div>
+        <div class="step"><h3>Read and return</h3><p>Check due dates in the app, then scan the book again in Return mode when you're done.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Everything the library desk does, in one app</h2>
+      <p class="kicker">Built for students and library staff at Pampanga State University.</p>
+      <div class="bento">
+        <div class="tile maroon t1">
+          <h3>Ask the AI librarian</h3>
+          <p>Not sure what to read? Ask for recommendations or help finding a topic.</p>
+          <div class="chat"><div class="bub me">Any books on cloud computing?</div><div class="bub ai">Here are a few from the catalog you can borrow today…</div></div>
+        </div>
+        <div class="tile t2">
+          <h3>Catalog &amp; search</h3>
+          <p>Browse what's on the shelves, or search online books.</p>
+          <div class="spines" aria-hidden="true"><i style="height:100%"></i><i style="height:72%"></i><i style="height:88%"></i><i style="height:60%"></i><i style="height:80%"></i></div>
+        </div>
+        <div class="tile t3">
+          <h3>Due dates at a glance</h3>
+          <p>See what's returned, due soon, or overdue.</p>
+          <div class="status" aria-hidden="true">
+            <div class="st g">Returned <span>✓</span></div>
+            <div class="st a">Due soon <span>3 days</span></div>
+            <div class="st r">Overdue <span>!</span></div>
+          </div>
+        </div>
+        <div class="tile t4">
+          <h3>Stay in the loop</h3>
+          <p>Push notifications when your request is answered.</p>
+          <div class="note" aria-hidden="true"><span class="dot">🔔</span>Your borrow request was approved</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slip-wrap">
+      <div class="slip">
+        <span class="cut t"></span><span class="cut b"></span>
+        <div class="slip-main">
+          <div class="slip-top"><span>Checkout slip</span><span class="barcode"></span></div>
+          <h2>Get LibraScan</h2>
+          <div class="fields">
+            <div class="f"><small>App</small><span>LibraScan</span></div>
+            <div class="f"><small>Version</small><span id="s-ver"></span></div>
+            <div class="f"><small>Size</small><span id="s-size"></span></div>
+            <div class="f"><small>Android</small><span id="s-os"></span></div>
+            <div class="f"><small>Permissions</small><span>Camera, notifications, photos</span></div>
+            <div class="f"><small>Network</small><span>Internet required</span></div>
+          </div>
+        </div>
+        <div class="slip-stub">
+          <a class="pill solid dl" href="#">⬇ Download APK</a>
+          <p>Direct download from this page.</p>
+        </div>
+      </div>
+      <details>
+        <summary>How to install</summary>
+        <ol>
+          <li>Tap Download and open the file when it finishes.</li>
+          <li>If Android asks, allow your browser to install unknown apps.</li>
+          <li>Tap Install, open LibraScan, and sign in.</li>
+        </ol>
+      </details>
+    </section>
+  </main>
+
+  <footer>© <span id="year"></span> LibraScan · Pampanga State University</footer>
+</div>
+
+<script>
+  // ====== EDIT THESE ======
+  const CONFIG = {
+    apkUrl: "https://YOUR-APK-LINK-HERE",  // direct link to the .apk
+    version: "v1.0.0",
+    size: "XX MB",
+    os: "7 or newer"                        // confirm against your build's minimum Android version
+  };
+  // ========================
+  const $ = id => document.getElementById(id);
+  $("m-ver").textContent = $("s-ver").textContent = CONFIG.version;
+  $("m-size").textContent = $("s-size").textContent = CONFIG.size;
+  $("s-os").textContent = CONFIG.os;
+  $("year").textContent = new Date().getFullYear();
+  document.querySelectorAll(".dl").forEach(a => { a.href = CONFIG.apkUrl; a.setAttribute("download", ""); });
+</script>
+</body>
+</html>
